@@ -1,0 +1,61 @@
+-- ============================================================
+-- Respaldo (dump) de la base de datos: consulta_productos
+-- Motor: PostgreSQL
+-- Contenido: estructura y datos de demo_categorias y demo_productos
+--
+-- Para restaurar:
+--   createdb consulta_productos
+--   psql -d consulta_productos -f respaldo_cafeteria.sql
+-- ============================================================
+
+SET client_encoding = 'UTF8';
+
+-- Elimina las tablas si ya existen (primero la que tiene la llave foránea)
+DROP TABLE IF EXISTS demo_productos;
+DROP TABLE IF EXISTS demo_categorias;
+
+-- ------------------------------------------------------------
+-- Tabla de categorías
+-- ------------------------------------------------------------
+CREATE TABLE demo_categorias (
+    categoria_id SERIAL PRIMARY KEY,
+    nombre       VARCHAR(80) NOT NULL
+);
+
+-- ------------------------------------------------------------
+-- Tabla de productos (se relaciona con demo_categorias)
+-- ------------------------------------------------------------
+CREATE TABLE demo_productos (
+    producto_id  SERIAL PRIMARY KEY,
+    nombre       VARCHAR(120) NOT NULL,
+    descripcion  TEXT,
+    precio       NUMERIC(10,2) NOT NULL,
+    categoria_id INTEGER NOT NULL,
+    CONSTRAINT fk_demo_categoria
+        FOREIGN KEY (categoria_id) REFERENCES demo_categorias (categoria_id)
+);
+
+-- ------------------------------------------------------------
+-- Datos: categorías
+-- ------------------------------------------------------------
+INSERT INTO demo_categorias (categoria_id, nombre) VALUES
+    (1, 'Cafetería'),
+    (2, 'Pastelería'),
+    (3, 'Bebidas');
+
+-- ------------------------------------------------------------
+-- Datos: productos
+-- ------------------------------------------------------------
+INSERT INTO demo_productos (producto_id, nombre, descripcion, precio, categoria_id) VALUES
+    (1, 'Café americano',     'Café preparado en máquina',       1800.00, 1),
+    (2, 'Café latte',         'Café con leche',                  2500.00, 1),
+    (3, 'Capuccino',          'Café espresso con espuma',        2800.00, 1),
+    (4, 'Té negro',           'Té en taza',                      1500.00, 3),
+    (5, 'Jugo de naranja',    'Jugo natural',                    2200.00, 3),
+    (6, 'Brownie',            'Porción de brownie de chocolate', 2300.00, 2),
+    (7, 'Torta de chocolate', 'Porción de torta',                3200.00, 2),
+    (8, 'Galleta avena',      'Galleta artesanal',               1200.00, 2);
+
+-- Ajusta los contadores automáticos para que los próximos INSERT sigan la numeración
+SELECT setval('demo_categorias_categoria_id_seq', 3, true);
+SELECT setval('demo_productos_producto_id_seq', 8, true);
