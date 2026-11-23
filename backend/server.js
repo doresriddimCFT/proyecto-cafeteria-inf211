@@ -45,18 +45,18 @@ app.get("/", (req, res) => {
 // Los filtros se aplican en JavaScript en el navegador para mantener simple el ejemplo.
 app.get("/api/productos", async (req, res) => {
   try {
-  const consulta = `
-    SELECT
+    const consulta = `
+      SELECT
         p.producto_id,
         p.nombre,
         p.descripcion,
         p.precio,
         c.nombre AS categoria
-    FROM demo_productos AS p
-    INNER JOIN demo_categorias AS c
+      FROM demo_productos AS p
+      INNER JOIN demo_categorias AS c
         ON p.categoria_id = c.categoria_id
-    ORDER BY p.nombre;
-`;
+      ORDER BY p.nombre;
+    `;
 
     const resultado = await pool.query(consulta);
     res.json(resultado.rows);
@@ -65,7 +65,8 @@ app.get("/api/productos", async (req, res) => {
     res.status(500).json({ mensaje: "Error al consultar la base de datos." });
   }
 });
-// Ruta para insertar un nuevo producto desde el formulario web
+
+// Inserta un nuevo producto desde el formulario web.
 app.post("/api/productos", async (req, res) => {
   try {
     const { nombre, descripcion, categoria, precio } = req.body;
@@ -79,15 +80,16 @@ app.post("/api/productos", async (req, res) => {
     const valores = [nombre, descripcion, categoria, precio];
     const resultado = await pool.query(consulta, valores);
 
-    res.status(201).json({ 
-      mensaje: "Producto guardado con éxito", 
-      producto: resultado.rows[0] 
+    res.status(201).json({
+      mensaje: "Producto guardado con éxito",
+      producto: resultado.rows[0]
     });
   } catch (error) {
     console.error("Error al insertar producto:", error.message);
     res.status(500).json({ mensaje: "Error al guardar en la base de datos." });
   }
 });
+
 app.listen(PORT, () => {
   console.log("Servidor escuchando en el puerto " + PORT);
 });
