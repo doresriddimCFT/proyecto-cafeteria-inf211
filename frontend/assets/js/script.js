@@ -1,13 +1,12 @@
-// Reemplaza esta dirección por la URL de TU backend publicado en Render.
+// URL de la API del backend (Node.js + Express + PostgreSQL).
 const URL_API = "http://localhost:3000/api/productos";
-// const URL_API = "https://REEMPLAZAR-POR-TU-BACKEND.onrender.com/api/productos";
-// const URL_API = "http://localhost:3000/api/productos";
 
 const tablaProductos = document.getElementById("tablaProductos");
 const mensaje = document.getElementById("mensaje");
 const buscarNombre = document.getElementById("buscarNombre");
 const filtroCategoria = document.getElementById("filtroCategoria");
 const limpiarFiltros = document.getElementById("limpiarFiltros");
+const formProducto = document.getElementById("formProducto");
 
 let productos = [];
 
@@ -27,7 +26,7 @@ async function cargarProductos() {
     mensaje.textContent = "Se encontraron " + productos.length + " productos.";
   } catch (error) {
     console.error("Error al cargar productos:", error);
-    mensaje.textContent = "No fue posible cargar los datos. Revisa la URL del backend y que el servidor esté disponible.";
+    mensaje.textContent = "No fue posible cargar los datos. Revisa que el servidor esté disponible.";
   }
 }
 
@@ -88,21 +87,9 @@ function filtrarProductos() {
   mensaje.textContent = "Resultados: " + resultado.length;
 }
 
-buscarNombre.addEventListener("input", filtrarProductos);
-filtroCategoria.addEventListener("change", filtrarProductos);
-limpiarFiltros.addEventListener("click", () => {
-  buscarNombre.value = "";
-  filtroCategoria.value = "";
-  mostrarProductos(productos);
-  mensaje.textContent = "Se muestran " + productos.length + " productos.";
-});
-
-cargarProductos();
-
-const formProducto = document.getElementById("formProducto");
-
-formProducto.addEventListener("submit", async (e) => {
-  e.preventDefault();
+// Envía un producto nuevo al backend (INSERT en PostgreSQL).
+async function guardarProducto(evento) {
+  evento.preventDefault();
 
   const nuevoProducto = {
     nombre: document.getElementById("nombre").value,
@@ -114,9 +101,7 @@ formProducto.addEventListener("submit", async (e) => {
   try {
     const respuesta = await fetch(URL_API, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nuevoProducto)
     });
 
@@ -125,10 +110,22 @@ formProducto.addEventListener("submit", async (e) => {
     }
 
     formProducto.reset();
-    cargarProductos();
+    await cargarProductos();
     mensaje.textContent = "¡Producto agregado con éxito!";
   } catch (error) {
     console.error("Error:", error);
     mensaje.textContent = "No se pudo guardar el producto.";
   }
+}
+
+buscarNombre.addEventListener("input", filtrarProductos);
+filtroCategoria.addEventListener("change", filtrarProductos);
+limpiarFiltros.addEventListener("click", () => {
+  buscarNombre.value = "";
+  filtroCategoria.value = "";
+  mostrarProductos(productos);
+  mensaje.textContent = "Se muestran " + productos.length + " productos.";
 });
+formProducto.addEventListener("submit", guardarProducto);
+
+cargarProductos();
